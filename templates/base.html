@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet" href="/static/bootstrap/dist/css/bootstrap.css">
+    <link rel="stylesheet" href="/static/theme/{{ blog.theme }}">
+
+    <script src="/static/jquery-3.3.1.js"></script>
+    <script src="/static/bootstrap/dist/js/bootstrap.js"></script>
+
+    <link rel="stylesheet" href="/static/css/article_detail.css">
+    <link rel="shortcut icon" href="/static/img/favicon.ico" type="image/x-icon">
+
+
+    <style>
+        .body {
+            margin-bottom: 10px;
+        }
+
+        a:hover {
+            color: orange;
+        }
+
+        .article_title {
+            margin-bottom: 8px;
+            font-size: 20px;
+        }
+
+        .article_desc {
+            margin-bottom: 8px;
+        }
+
+        .article_desc {
+            text-align: justify;
+        }
+
+        #digg_tips {
+            color: greenyellow;
+            clear: both;
+        }
+        .comment_list{
+            clear: both;
+        }
+    </style>
+</head>
+<body>
+<nav class="navbar navbar-default header">
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header ">
+            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse"
+                    data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+
+
+            <a class="navbar-brand" href="#" style="padding: 0"><img src="/static/img/logo.png" alt=""
+                                                                     style="height: 56px;width: 170px"></a>
+            <a class="navbar-brand" href="#" style="margin-left: 10px">园子</a>
+        </div>
+        <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+            <ul class="nav navbar-nav">
+                <li class="btn-info"><a href="#">新闻 <span class="sr-only">(current)</span></a></li>
+                <li><a href="#">博问</a></li>
+                <li><a href="#">闪存</a></li>
+                <li><a href="#">收藏</a></li>
+                <li><a href="#">小组</a></li>
+            </ul>
+            <ul class="nav navbar-nav navbar-right">
+                <li><a href="#">Link</a></li>
+                <li class="dropdown">
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true"
+                       aria-expanded="false">Dropdown <span class="caret"></span></a>
+                    <ul class="dropdown-menu">
+                        <li><a href="#">修改密码</a></li>
+                        <li><a href="#">个人信息</a></li>
+                        <li><a href="#">后台管理</a></li>
+                        <li role="separator" class="divider"></li>
+                        <li><a href="#">注销</a></li>
+                    </ul>
+                </li>
+            </ul>
+        </div><!-- /.navbar-collapse -->
+    </div><!-- /.container-fluid -->
+</nav>
+<div class="container-fluid">
+    <div class="row">
+
+        <div class="col-md-3">
+            {% load my_tags %} {# 先引入my_tags模块 #}
+
+            {% get_query_data username %} {# 再调用get_query_data方法 #}
+        </div>
+
+
+        <div class="col-md-9">
+            {% block content %}
+
+            {% endblock %}
+        </div>
+    </div>
+</div>
+
+{% csrf_token %}
+<script>
+    // 点赞或踩灭操作
+    $(".action_count").click(function () {
+
+        if ("{{ request.user.username }}") {    //判断是否登录
+            var is_up = $(this).hasClass("diggit");
+            var _this = $(this).children("span");
+
+            $.ajax({
+                url: "/updown/",
+                type: "post",
+                data: {
+                    is_up: is_up,
+                    {#user_id:"{{ request.user.pk}}",#}
+                    article_id:"{{ article_obj.pk}}",
+                    csrfmiddlewaretoken: $("[name='csrfmiddlewaretoken']").val()
+                },
+                success: function (data) {
+                    if ("{{ request.user.username }}") {
+                        if (data.state) {
+                            // 操作成功
+                            _this.text(parseInt(_this.text()) + 1) // 获取并修改当前操作数
+                        }
+                        else {
+                            //  操作失败==》重复操作，已经点过赞或踩灭
+                            var val = data.handled ? "您已经推荐过" : "您已踩灭过";
+                            $("#digg_tips").html(val);
+                            setTimeout(function () {
+                                $("#digg_tips").html("") // 两秒之后显示的数据自动消失
+                            }, 2000)
+
+                        }
+                    }
+
+                },
+                error:function () {
+                    console.log("失败")
+                }
+            })
+        }
+         else {
+            location.href="/login/"
+        }
+    });
+
+    // 评论操作事件
+    var parent_id = "";
+    $("input.comment_btn").click(function () {
+        var content = $("#comment_content").val();
+
+        if(parent_id){
+            var index = content.indexOf("\n");
+            content = content.slice(index+1)
+        }
+        $.ajax({
+                url: "/comment/",
+                type: "post",
+                data: {
+                    content:content,
+                    article_id:"{{ article_obj.pk}}",
+                    parent_id:parent_id,
+                    csrfmiddlewaretoken: $("[name='csrfmiddlewaretoken']").val()
+                },
+                success: function (data){
+                    var comment_timer = data.timer;
+                    var comment_content = data.content;
+                    var comment_user = data.user;
+
+                    var $str = `<li class="list-group-item">
+                        <div>
+                            <span>${comment_timer}</span>&nbsp;&nbsp;&nbsp;
+                            <a href="">${comment_user}</a>
+                        </div>
+                        <div>
+                            <p>${comment_content}</p>
+                        </div>
+                        <a href="javascript:void(0)" class="pull-right replay_btn"
+                               user="{{ comment.user.username }}" comment_id="{{ comment.pk }}">回复</a>
+                    </li>
+                    `;
+                    $("ul.comment_list").append($str);
+
+                    // 把评论区清空
+                    $("#comment_content").val("")
+
+
+                }
+
+        })
+    });
+
+
+    // "回复"按钮操作事件
+    $(".replay_btn").click(function () {
+        $("#comment_content").focus();  // 点击“回复”按钮，立刻就跳转到评论区域
+        var val = "@"+ $(this).attr("user")+"\n" ; // 子评论需要显示“@”+ 评论人的名字
+         $("#comment_content").val(val)         // 在评论区域显示显示“@”+ 评论人的名字这些内容
+        {# 回复按钮获取父评论的id #}
+        parent_id=$(this).attr("comment_id");
+    })
+</script>
+
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

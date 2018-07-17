@@ -1,0 +1,43 @@
+{% extends 'backstage/base.html' %}
+{% block taking_title %}
+    <title>editor</title>
+{% endblock %}
+{#{% include "backstage/base.html" %}  ===>全继承 #}
+{% block taking_content %}
+    <form method="post" action="/backstage/editor/{{ article.pk }}">
+        {% csrf_token %}
+        <div class="form-group">
+            <button type="button" class="btn btn-primary btn-lg active">添加书籍</button>
+            <br>
+            <br>
+
+            <label for="a1">文章名</label>
+            <input type="text" class="form-control" id="a1" value="{{ article.title }}" name="title">
+            <br>
+
+            <label for="a2">文章描述</label>
+            <input type="text" class="form-control" id="a2" value="{{ article.desc }}" name="desc">
+            <br>
+
+            <label for="a3">文章内容</label>
+            <textarea class="form-control"id="a3" cols="30" rows="10" name="content">{{ article.content}}</textarea>
+            <br>
+            <label for="a4">请选择文章分类</label>
+{#            <select class="form-control" name="authors" multiple="">#}
+                {% for cate in cate_list %}
+                    {% if cate.pk == article.category.pk %}
+                        <p>{{ cate.title }}
+                        <input type="radio" checked="" name="cate_id" value="{{ cate.pk }}" id="a4"></p>
+                    {% else %}
+                        <p>{{ cate.title }}
+                        <input type="radio" name="cate_id" value="{{ cate.pk }}" id="a4"></p>
+                    {% endif %}
+
+                {% endfor %}
+            <br>
+{#            </select>#}
+
+            <button type="submit" class="btn btn-success" style="float: right">提交</button>
+        </div>
+    </form>
+{% endblock %}

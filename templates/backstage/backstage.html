@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet" href="/static/bootstrap/dist/css/bootstrap.css">
+    <link rel="stylesheet" href="/static/css/books.css">
+    <link rel="stylesheet" href="/static/plugins/sweetalert.css">
+
+    <script src="/static/jquery-3.3.1.js"></script>
+    <script src="/static/bootstrap/dist/js/bootstrap.js"></script>
+
+    <script src="/static/plugins/sweetalert-dev.js"></script>
+</head>
+
+<body>
+<div class="container">
+    <nav class="navbar navbar-inverse navbar-fixed-top">
+        <div class="container-fluid">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar"
+                        aria-expanded="false" aria-controls="navbar">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="#">Project name</a>
+            </div>
+            <div id="navbar" class="navbar-collapse collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li><a href="#">{{ request.session.user }}</a></li>
+                    <li><a href="#">{{ request.session.last_time}}</a></li>
+                    <li><a href="{% url 'logout' %}">注销</a></li>
+                </ul>
+                <form class="navbar-form navbar-right">
+                    <input type="text" class="form-control" placeholder="Search...">
+                </form>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-sm-3 col-md-2 sidebar">
+                <ul class="nav nav-sidebar">
+                    <li class="active"><a href="#">Overview <span class="sr-only">(current)</span></a></li>
+                    <li><a href="#">Reports</a></li>
+                    <li><a href="#">Analytics</a></li>
+                    <li><a href="#">Export</a></li>
+                </ul>
+                <ul class="nav nav-sidebar">
+                    <li><a href="">Nav item</a></li>
+                    <li><a href="">Nav item again</a></li>
+                    <li><a href="">One more nav</a></li>
+                    <li><a href="">Another nav item</a></li>
+                    <li><a href="">More navigation</a></li>
+                </ul>
+                <ul class="nav nav-sidebar">
+                    <li><a href="">Nav item again</a></li>
+                    <li><a href="">One more nav</a></li>
+                    <li><a href="">Another nav item</a></li>
+                </ul>
+            </div>
+            <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+                <table class="table table-bordered table-hover">
+                    {% csrf_token %}
+
+                    <div>
+                        <button type="submit" class="btn btn-danger"><a href="{% url "add" %}">添加文章</a></button>
+                    </div>
+                    <br>
+                    <br>
+
+                    <thead>
+                    <tr>
+                        <td class="active">编号</td>
+                        <td class="info">文章名称</td>
+                        <td class="danger">评论数</td>
+                        <td class="success">点赞数</td>
+                        <td class="active">踩灭数</td>
+                        <td class="info">删除操作</td>
+                        <td class="warning">编辑操作</td>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for article in article_list %}
+                        <tr>
+                            <td class="active">{{ forloop.counter }}</td>
+                            <td class="info">{{ article.title }}</td>
+                            <td class="danger">{{ article.comment_count }}</td>
+                            <td class="success">{{ article.up_count }}</td>
+                            <td class="active">{{ article.down_count }}</td>
+                            <td class="info">
+                                <a href="javascript:void(0)">
+                                    <input type="button" class="btn btn-danger delete" delete_id="{{ article.pk }}" value="删除">
+                                </a>
+                            </td>
+                            {% csrf_token %}
+                            <td class="warning">
+                                <a href="/backstage/editor/{{ article.pk }}/">
+                                    <button type="submit" class="btn btn-warning editor">编辑</button>
+                                </a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+</div>
+</body>
+
+
+<script>
+    $(".delete").click(function () {
+        var _this = $(this);
+        swal({
+            title: "确定删除吗？",
+            text: "你将无法恢复该虚拟文件！",
+            type: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#DD6B55",
+            confirmButtonText: "确定删除！",
+            cancelButtonText: "取消删除！",
+            closeOnConfirm: false,
+            closeOnCancel: false
+        },
+        function (isConfirm) {
+            if (isConfirm) {
+                swal("删除！", "你的虚拟文件已经被删除。",
+                    "success"
+                );$.ajax({
+            url:"delete/",
+            type: 'post',
+            data: {
+                delete_id: _this.attr('delete_id'),  // 6
+                csrfmiddlewaretoken: $("[name='csrfmiddlewaretoken']").val()
+            },
+            success: function (data) {
+                data = JSON.parse(data);
+                if (data.status) {
+                    _this.parent().parent().parent().remove()
+                }
+            }
+        })
+
+
+            } else {
+                swal("取消！", "你的虚拟文件是安全的:)",
+                    "error");
+            }
+        });
+
+
+    })
+
+
+
+
+
+
+</script>
+
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

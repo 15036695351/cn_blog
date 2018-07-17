@@ -1,0 +1,7 @@
+  *{
+        margin: 0;
+        padding: 0;
+  }
+        .header{
+            background-color: rgba(0,100,255,.4);
+        }

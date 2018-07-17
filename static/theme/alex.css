@@ -1,0 +1,9 @@
+  *{
+        margin: 0;
+        padding: 0;
+  }
+        .header{
+            /*width: 100%;*/
+            /*height: 59px;*/
+            background-color: rgba(250,100,255,.4);
+        }

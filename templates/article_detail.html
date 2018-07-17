@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <div class="article_detail">
+        <div class="text-center article_title">{{ article_obj.title }}</div>
+        <div class="content">{{ article_obj.content|safe }}</div>
+
+        <div id="div_digg">
+            {# 点赞 #}
+            <div class="diggit action_count">
+                <span class="diggnum" id="digg_count">{{ article_obj.up_count }}</span>
+            </div>
+            {# 点灭 #}
+            <div class="buryit action_count">
+                <span class="burynum " id="bury_count">{{ article_obj.down_count }}</span>
+            </div>
+
+            <div class="clear"></div>
+
+            <div class="diggword" id="digg_tips"></div>
+
+
+            <div class="is_up_content"></div>
+
+        </div>
+
+    </div>
+
+    <div class="comment_list">
+        <hr>
+        <p style="font-size: larger"><b>评论列表</b></p>
+        <hr>
+        <div class="comment">
+            <ul class="list-group comment_list">
+                {% for comment in comment_list %}
+                    <li class="list-group-item ">
+                        <div>
+                            <a href="">#{{ forloop.counter }}楼</a>&nbsp;&nbsp;&nbsp;
+                            <span>{{ comment.create_time|date:"Y-m-d H-i" }}</span>&nbsp;&nbsp;&nbsp;
+                            <a href="">{{ comment.user.username }}</a>
+                            <a href="javascript:void(0)" class="pull-right replay_btn"
+                               user="{{ comment.user.username }}" comment_id="{{ comment.pk }}">回复</a>
+                        </div>
+                        {% if comment.parent_comment_id %}  {# 如果存在父评论==》对评论的评论 #}
+                            <div class="parent_comment_info well">
+                            <p>
+                                {{ comment.parent_comment.user }}:{{ comment.parent_comment.content }}
+                                        {# 获取父评论用户和父评论内容 #}
+                            </p>
+                            </div>
+                        {% endif %}
+
+                    <div>
+                        <p>{{ comment.content }}</p>
+                    </div>
+                </li>
+                {% endfor %}
+            </ul>
+            <p>发表评论</p>
+            <p>昵称：<input type="text" id="tbCommentAuthor" class="author btn btn-info"
+                         disabled="disabled" size="50" value="{{ request.user.username }}"></p>
+            <div>
+                <textarea name="" id="comment_content" style="width: 100%"  rows="10"></textarea>
+            </div>
+            <input type="button" value="提交" class="btn btn-info comment_btn">
+        </div>
+
+    </div>
+{% endblock %}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
