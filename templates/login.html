@@ -20,10 +20,23 @@
                         <label for="pwd">密码</label>
                         <input type="text" name="pwd" class="form-control">
                     </div>
-                    <input type="submit" class="btn btn-success" value="提交" id="pwd">
+
+                    <div class="form-group">
+                        <label for="pwd">验证码</label>
+                        <input type="text" name="code" placeholder="请输入验证码" class="form-control"/>
+                        <img onclick="changeImg(this);" src="/code/" alt="" title="点击更换">
+                    </div>
+                    <input type="submit" class="btn btn-success" value="提交">
+                    <span>{{ msg }}</span>
                 </form>
             </div>
         </div>
     </div>
+<script>
+        function changeImg(ths) {
+            ths.src = ths.src + '?';
+        }
+    </script>
 </body>
+
 </html>

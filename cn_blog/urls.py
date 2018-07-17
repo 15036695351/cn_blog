@@ -22,6 +22,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('login/', views.login, name='login'),
     path('index/', views.index, name='index'),
+    path('code/', views.code),
     path('logout/', views.logout, name='logout'),
     path('comment/', views.comment),
     path('backstage/', views.backstage,name="backstage"),    # 个人站点后台管理页面

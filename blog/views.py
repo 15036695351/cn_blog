@@ -7,15 +7,42 @@ from django.contrib import auth
 from django.db.models import Avg,Count,Min,Max
 
 from blog.models import UserInfo,Blog,Category,Tag,Comment,Article2Tag,Article,ArticleUpDown
+
+from utils.code import check_code
+import random
+from io import BytesIO
+
+
+def code(request):
+    """
+    生成图片验证码
+    :param request:
+    :return:
+    """
+    img, random_code = check_code()
+    request.session['random_code'] = random_code
+    from io import BytesIO
+    stream = BytesIO()
+    img.save(stream, 'png')
+    return HttpResponse(stream.getvalue())
+
+
 def login(request):
-    if request.method =="POST":
-        user=request.POST.get("user")
-        pwd=request.POST.get("pwd")
-        user=auth.authenticate(username=user,password=pwd)
-        if user:
-            auth.login(request,user)
-            return redirect("/index/")
-    return render(request,"login.html")
+    if request.method == "GET":
+        return render(request, "login.html")
+    user = request.POST.get("user")
+    pwd = request.POST.get("pwd")
+    code = request.POST.get("code")
+    print("code",code)
+    if code.upper() != request.session['random_code'].upper():
+        return render(request, 'login.html', {"msg": "验证码输入错误"})
+
+    user = auth.authenticate(username=user,password=pwd)
+    if user:
+        auth.login(request,user)
+        return redirect("/index/")
+    return render(request,"login.html",{'msg': '用户名或密码错误'})
+
 
 def logout(request):
     auth.logout(request)
@@ -222,6 +249,28 @@ def delete(request):
         # print("delete_id",delete_id,"############")
         Article.objects.filter(pk=delete_id).delete()
         return HttpResponse(json.dumps({"status":1}))
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
